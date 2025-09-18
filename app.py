@@ -15,6 +15,8 @@ model = joblib.load('cd4_risk_classifier.pkl')
 st.sidebar.header("📋 Patient Details")
 age = st.sidebar.number_input("🎂 Age at reporting", min_value=0, max_value=120)
 sex = st.sidebar.selectbox("⚧️ Sex", ["Male", "Female"])
+first_regimen = st.sidebar.text_input("🧬 First Regimen")
+care_model = st.sidebar.text_input("🏥 Differentiated Care Model")
 regimen = st.sidebar.text_input("💊 Current Regimen")
 who_stage = st.sidebar.selectbox("🩺 WHO Stage", [1, 2, 3, 4])
 vl_result = st.sidebar.number_input("🧪 Last VL Result", min_value=0)
@@ -25,15 +27,16 @@ cd4_missing = st.sidebar.selectbox("❓ CD4 Missing", ["Yes", "No"])
 input_df = pd.DataFrame({
     'Age at reporting': [age],
     'Sex': [1 if sex == "Male" else 0],
+    'First Regimen': [hash(first_regimen) % 1000],
     'Current Regimen': [hash(regimen) % 1000],
     'Last WHO Stage': [who_stage],
     'Last VL Result': [vl_result],
     'Active in TB': [1 if tb_status == "Yes" else 0],
+    'Differentiated care model': [hash(care_model) % 1000],
     'Months of Prescription': [months_rx],
-    'CD4_Missing': [1 if cd4_missing == "Yes" else 0],
-    'First Regimen': [0],  # Placeholder
-    'Differentiated care model': [0]  # Placeholder
+    'CD4_Missing': [1 if cd4_missing == "Yes" else 0]
 })
+
 
 if st.button("🔍 Predict Risk"):
     prediction = model.predict(input_df)[0]
