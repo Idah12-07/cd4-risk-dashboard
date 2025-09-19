@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+model = joblib.load('cd4_risk_classifier.pkl')
 
 st.markdown("<h1 style='text-align: center; color: teal;'>🧠 CD4 Risk Intelligence Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("""
