@@ -10,7 +10,12 @@ Predict immunological suppression in HIV patients using proxy features — even 
 </p>
 """, unsafe_allow_html=True)
 
-model = joblib.load('cd4_risk_classifier.pkl')
+import joblib
+
+model      = joblib.load('cd4_risk_classifier.pkl')
+le_first   = joblib.load('le_first_reg.pkl')
+le_current = joblib.load('le_current_reg.pkl')
+le_care    = joblib.load('le_care.pkl')
 
 st.sidebar.header("📋 Patient Details")
 age = st.sidebar.number_input("🎂 Age at reporting", min_value=0, max_value=120)
@@ -28,27 +33,44 @@ regimen_map = {"TDF/3TC/DTG": 0, "AZT/3TC/ATV/r": 1, "ABC/3TC/DTG": 2, "Other": 
 first_regimen_map = {"TDF/3TC/EFV": 0, "AZT/3TC/NVP": 1, "ABC/3TC/EFV": 2, "Other": 3}
 care_model_map = {"Facility Fast Track": 0, "Community ART Group": 1, "Home Delivery": 2, "Standard Facility": 3, "Other": 4}
 
+# Sidebar already defines: first_regimen, regimen, care_model, age, sex, who_stage, vl_result, tb_status, months_rx, cd4_missing
+
 input_df = pd.DataFrame({
-    'Age at reporting': [age],
-    'Sex': [1 if sex == "Male" else 0],
-    'First Regimen': [first_regimen_map[first_regimen]],
-    'Current Regimen': [regimen_map[regimen]],
-    'Last WHO Stage': [who_stage],
-    'Last VL Result': [vl_result],
-    'Active in TB': [1 if tb_status == "Yes" else 0],
-    'Differentiated care model': [care_model_map[care_model]],
-    'Months of Prescription': [months_rx],
-    'CD4_Missing': [1 if cd4_missing == "Yes" else 0]
+    'Age at reporting':        [age],
+    'Sex':                     [1 if sex == "Male" else 0],
+    'First Regimen':           [le_first.transform([first_regimen])[0]],
+    'Current Regimen':         [le_current.transform([regimen])[0]],
+    'Last WHO Stage':          [who_stage],
+    'Last VL Result':          [vl_result],
+    'Active in TB':            [1 if tb_status == "Yes" else 0],
+    'Differentiated care model': [le_care.transform([care_model])[0]],
+    'Months of Prescription':  [months_rx],
+    'CD4_Missing':             [1 if cd4_missing == "Yes" else 0]
 })
-
-
+# Let the user tune the risk threshold
+threshold = st.sidebar.slider(
+    "Risk threshold",
+    0.0, 1.0, 0.5, 0.01
+)
 
 if st.button("🔍 Predict Risk"):
-    prediction = model.predict(input_df)[0]
-    if prediction == 1:
-        st.markdown("<h3 style='color: red;'>⚠️ Immunological Risk: Suppressed (CD4 < 200)</h3>", unsafe_allow_html=True)
+    # 1. Get the probability of “Suppressed” (CD4<200)
+    proba = model.predict_proba(input_df)[0][1]
+
+    # 2. Compare to the slider threshold
+    if proba >= threshold:
+        st.markdown(
+            "<h3 style='color: red;'>⚠️ Immunological Risk: Suppressed (CD4 < 200)</h3>",
+            unsafe_allow_html=True
+        )
     else:
-        st.markdown("<h3 style='color: green;'>✅ Immunological Risk: Safe</h3>", unsafe_allow_html=True)
+        st.markdown(
+            "<h3 style='color: green;'>✅ Immunological Risk: Safe</h3>",
+            unsafe_allow_html=True
+        )
+
+    # 3. Always show the probability
+    st.write(f"🔍 Suppression Risk Probability: {proba:.2f}")
 
 with st.expander("ℹ️ About This Model"):
     st.markdown("""
