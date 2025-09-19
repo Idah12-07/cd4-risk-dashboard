@@ -24,18 +24,23 @@ tb_status = st.sidebar.selectbox("🦠 Active in TB", ["Yes", "No"])
 months_rx = st.sidebar.number_input("📆 Months of Prescription", min_value=0)
 cd4_missing = st.sidebar.selectbox("❓ CD4 Missing", ["Yes", "No"])
 
+regimen_map = {"TDF/3TC/DTG": 0, "AZT/3TC/ATV/r": 1, "ABC/3TC/DTG": 2, "Other": 3}
+first_regimen_map = {"TDF/3TC/EFV": 0, "AZT/3TC/NVP": 1, "ABC/3TC/EFV": 2, "Other": 3}
+care_model_map = {"Facility Fast Track": 0, "Community ART Group": 1, "Home Delivery": 2, "Standard Facility": 3, "Other": 4}
+
 input_df = pd.DataFrame({
     'Age at reporting': [age],
     'Sex': [1 if sex == "Male" else 0],
-    'First Regimen': [hash(first_regimen) % 1000],
-    'Current Regimen': [hash(regimen) % 1000],
+    'First Regimen': [first_regimen_map[first_regimen]],
+    'Current Regimen': [regimen_map[regimen]],
     'Last WHO Stage': [who_stage],
     'Last VL Result': [vl_result],
     'Active in TB': [1 if tb_status == "Yes" else 0],
-    'Differentiated care model': [hash(care_model) % 1000],
+    'Differentiated care model': [care_model_map[care_model]],
     'Months of Prescription': [months_rx],
     'CD4_Missing': [1 if cd4_missing == "Yes" else 0]
 })
+
 
 
 if st.button("🔍 Predict Risk"):
