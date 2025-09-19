@@ -74,6 +74,13 @@ if st.button("🔍 Predict Risk"):
 
     # 3. Always show the probability
     st.write(f"🔍 Suppression Risk Probability: {proba:.2f}")
+with st.expander("ℹ️ What does this prediction mean?"):
+    st.markdown("""
+    - **Suppressed (CD4 < 200)**: Indicates a weakened immune system. Patients are at high risk for opportunistic infections.
+    - **Safe**: Suggests CD4 is likely above 200, but clinical judgment is still needed.
+    - This prediction is based on proxy features like WHO Stage, TB status, VL, and ART regimen.
+    - Use the **risk threshold slider** to adjust sensitivity.
+    """)
 
 with st.expander("ℹ️ About This Model"):
     st.markdown("""
