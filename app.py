@@ -11,17 +11,36 @@ Predict immunological suppression in HIV patients using proxy features — even 
 </p>
 """, unsafe_allow_html=True)
 
+# 🧪 Demo Mode Profiles
+demo_profiles = {
+    "None": {},
+    "Low Risk": {
+        "Age": 28, "Sex": "Female", "WHO Stage": 1, "VL": 200, "TB": "No",
+        "Months Rx": 6, "CD4 Missing": "No", "First Regimen": "TDF/3TC/EFV",
+        "Current Regimen": "TDF/3TC/DTG", "Care Model": "Facility Fast Track"
+    },
+    "High Risk": {
+        "Age": 42, "Sex": "Male", "WHO Stage": 4, "VL": 100000, "TB": "Yes",
+        "Months Rx": 1, "CD4 Missing": "Yes", "First Regimen": "ABC/3TC/EFV",
+        "Current Regimen": "AZT/3TC/ATV/r", "Care Model": "Home Delivery"
+    }
+}
+
+selected_demo = st.sidebar.selectbox("🧪 Load Demo Profile", list(demo_profiles.keys()))
+demo = demo_profiles[selected_demo]
+
 st.sidebar.header("📋 Patient Details")
-age = st.sidebar.number_input("🎂 Age at reporting", min_value=0, max_value=120)
-sex = st.sidebar.selectbox("⚧️ Sex", ["Male", "Female"])
-first_regimen = st.sidebar.selectbox("🧬 First Regimen", ["TDF/3TC/EFV", "AZT/3TC/NVP", "ABC/3TC/EFV", "Other"])
-regimen = st.sidebar.selectbox("💊 Current Regimen", ["TDF/3TC/DTG", "ABC/3TC/DTG", "AZT/3TC/ATV/r", "Other"])
-care_model = st.sidebar.selectbox("🏥 Differentiated Care Model", ["Facility Fast Track", "Community ART Group", "Home Delivery", "Standard Facility", "Other"])
-who_stage = st.sidebar.selectbox("🩺 WHO Stage", [1, 2, 3, 4])
-vl_result = st.sidebar.number_input("🧪 Last VL Result", min_value=0)
-tb_status = st.sidebar.selectbox("🦠 Active in TB", ["Yes", "No"])
-months_rx = st.sidebar.number_input("📆 Months of Prescription", min_value=0)
-cd4_missing = st.sidebar.selectbox("❓ CD4 Missing", ["Yes", "No"])
+age = st.sidebar.number_input("🎂 Age at reporting", min_value=0, max_value=120, value=demo.get("Age", 30))
+sex = st.sidebar.selectbox("⚧️ Sex", ["Male", "Female"], index=["Male", "Female"].index(demo.get("Sex", "Male")))
+first_regimen = st.sidebar.selectbox("🧬 First Regimen", ["TDF/3TC/EFV", "AZT/3TC/NVP", "ABC/3TC/EFV", "Other"], index=["TDF/3TC/EFV", "AZT/3TC/NVP", "ABC/3TC/EFV", "Other"].index(demo.get("First Regimen", "TDF/3TC/EFV")))
+regimen = st.sidebar.selectbox("💊 Current Regimen", ["TDF/3TC/DTG", "ABC/3TC/DTG", "AZT/3TC/ATV/r", "Other"], index=["TDF/3TC/DTG", "ABC/3TC/DTG", "AZT/3TC/ATV/r", "Other"].index(demo.get("Current Regimen", "TDF/3TC/DTG")))
+care_model = st.sidebar.selectbox("🏥 Differentiated Care Model", ["Facility Fast Track", "Community ART Group", "Home Delivery", "Standard Facility", "Other"], index=["Facility Fast Track", "Community ART Group", "Home Delivery", "Standard Facility", "Other"].index(demo.get("Care Model", "Facility Fast Track")))
+who_stage = st.sidebar.selectbox("🩺 WHO Stage", [1, 2, 3, 4], index=[1, 2, 3, 4].index(demo.get("WHO Stage", 1)))
+vl_result = st.sidebar.number_input("🧪 Last VL Result", min_value=0, value=demo.get("VL", 0))
+tb_status = st.sidebar.selectbox("🦠 Active in TB", ["Yes", "No"], index=["Yes", "No"].index(demo.get("TB", "No")))
+months_rx = st.sidebar.number_input("📆 Months of Prescription", min_value=0, value=demo.get("Months Rx", 1))
+cd4_missing = st.sidebar.selectbox("❓ CD4 Missing", ["Yes", "No"], index=["Yes", "No"].index(demo.get("CD4 Missing", "No")))
+
 
 regimen_map = {"TDF/3TC/DTG": 0, "AZT/3TC/ATV/r": 1, "ABC/3TC/DTG": 2, "Other": 3}
 first_regimen_map = {"TDF/3TC/EFV": 0, "AZT/3TC/NVP": 1, "ABC/3TC/EFV": 2, "Other": 3}
